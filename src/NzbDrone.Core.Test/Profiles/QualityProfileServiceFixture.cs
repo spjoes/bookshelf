@@ -143,21 +143,105 @@ namespace NzbDrone.Core.Test.Profiles
         }
 
         [Test]
+        public void should_not_be_able_to_delete_profile_if_assigned_to_author_media_profiles()
+        {
+            var profile = Builder<QualityProfile>.CreateNew()
+                .With(p => p.Id = 2)
+                .Build();
+
+            var authorList = Builder<Author>.CreateListOfSize(2)
+                .All()
+                .With(c => c.QualityProfileId = 1)
+                .TheFirst(1)
+                .With(c => c.EbookQualityProfileId = profile.Id)
+                .TheNext(1)
+                .With(c => c.AudiobookQualityProfileId = profile.Id)
+                .Build().ToList();
+
+            Mocker.GetMock<IAuthorService>().Setup(c => c.GetAllAuthors()).Returns(authorList);
+            Mocker.GetMock<IImportListFactory>().Setup(c => c.All()).Returns(new List<ImportListDefinition>());
+            Mocker.GetMock<IRootFolderService>().Setup(c => c.All()).Returns(new List<RootFolder>());
+            Mocker.GetMock<IProfileRepository>().Setup(c => c.Get(profile.Id)).Returns(profile);
+
+            Assert.Throws<QualityProfileInUseException>(() => Subject.Delete(profile.Id));
+
+            Mocker.GetMock<IProfileRepository>().Verify(c => c.Delete(It.IsAny<int>()), Times.Never());
+        }
+
+        [Test]
+        public void should_not_be_able_to_delete_profile_if_assigned_to_import_list_media_profiles()
+        {
+            var profile = Builder<QualityProfile>.CreateNew()
+                .With(p => p.Id = 2)
+                .Build();
+
+            var importLists = Builder<ImportListDefinition>.CreateListOfSize(2)
+                .All()
+                .With(c => c.ProfileId = 1)
+                .TheFirst(1)
+                .With(c => c.EbookProfileId = profile.Id)
+                .TheNext(1)
+                .With(c => c.AudiobookProfileId = profile.Id)
+                .Build().ToList();
+
+            Mocker.GetMock<IAuthorService>().Setup(c => c.GetAllAuthors()).Returns(new List<Author>());
+            Mocker.GetMock<IImportListFactory>().Setup(c => c.All()).Returns(importLists);
+            Mocker.GetMock<IRootFolderService>().Setup(c => c.All()).Returns(new List<RootFolder>());
+            Mocker.GetMock<IProfileRepository>().Setup(c => c.Get(profile.Id)).Returns(profile);
+
+            Assert.Throws<QualityProfileInUseException>(() => Subject.Delete(profile.Id));
+
+            Mocker.GetMock<IProfileRepository>().Verify(c => c.Delete(It.IsAny<int>()), Times.Never());
+        }
+
+        [Test]
+        public void should_not_be_able_to_delete_profile_if_assigned_to_root_folder_media_profiles()
+        {
+            var profile = Builder<QualityProfile>.CreateNew()
+                .With(p => p.Id = 2)
+                .Build();
+
+            var rootFolders = Builder<RootFolder>.CreateListOfSize(2)
+                .All()
+                .With(f => f.DefaultQualityProfileId = 1)
+                .TheFirst(1)
+                .With(f => f.DefaultEbookQualityProfileId = profile.Id)
+                .TheNext(1)
+                .With(f => f.DefaultAudiobookQualityProfileId = profile.Id)
+                .BuildList();
+
+            Mocker.GetMock<IAuthorService>().Setup(c => c.GetAllAuthors()).Returns(new List<Author>());
+            Mocker.GetMock<IImportListFactory>().Setup(c => c.All()).Returns(new List<ImportListDefinition>());
+            Mocker.GetMock<IRootFolderService>().Setup(c => c.All()).Returns(rootFolders);
+            Mocker.GetMock<IProfileRepository>().Setup(c => c.Get(profile.Id)).Returns(profile);
+
+            Assert.Throws<QualityProfileInUseException>(() => Subject.Delete(profile.Id));
+
+            Mocker.GetMock<IProfileRepository>().Verify(c => c.Delete(It.IsAny<int>()), Times.Never());
+        }
+
+        [Test]
         public void should_delete_profile_if_not_assigned_to_author_import_list_or_root_folder()
         {
             var authorList = Builder<Author>.CreateListOfSize(3)
                                             .All()
                                             .With(c => c.QualityProfileId = 2)
+                                            .With(c => c.EbookQualityProfileId = 2)
+                                            .With(c => c.AudiobookQualityProfileId = 2)
                                             .Build().ToList();
 
             var importLists = Builder<ImportListDefinition>.CreateListOfSize(2)
                 .All()
                 .With(c => c.ProfileId = 2)
+                .With(c => c.EbookProfileId = 2)
+                .With(c => c.AudiobookProfileId = 2)
                 .Build().ToList();
 
             var rootFolders = Builder<RootFolder>.CreateListOfSize(2)
                 .All()
                 .With(f => f.DefaultQualityProfileId = 2)
+                .With(f => f.DefaultEbookQualityProfileId = 2)
+                .With(f => f.DefaultAudiobookQualityProfileId = 2)
                 .BuildList();
 
             Mocker.GetMock<IAuthorService>().Setup(c => c.GetAllAuthors()).Returns(authorList);
