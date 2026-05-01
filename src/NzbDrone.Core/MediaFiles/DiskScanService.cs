@@ -186,6 +186,7 @@ namespace NzbDrone.Core.MediaFiles
                     Modified = decision.Item.Modified,
                     DateAdded = DateTime.UtcNow,
                     Quality = decision.Item.Quality,
+                    MediaType = decision.Item.MediaType,
                     MediaInfo = decision.Item.FileTrackInfo.MediaInfo,
                     Edition = decision.Item.Edition
                 })
@@ -213,6 +214,7 @@ namespace NzbDrone.Core.MediaFiles
                     x.File.Modified = x.Item.Modified;
                     x.File.MediaInfo = x.Item.FileTrackInfo.MediaInfo;
                     x.File.Quality = x.Item.Quality;
+                    x.File.MediaType = x.Item.MediaType;
                     return x.File;
                 })
                 .ToList();

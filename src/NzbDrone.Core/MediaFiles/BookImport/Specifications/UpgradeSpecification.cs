@@ -26,7 +26,10 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Specifications
 
         public Decision IsSatisfiedBy(LocalBook item, DownloadClientItem downloadClientItem)
         {
-            var files = item.Book?.BookFiles?.Value;
+            var mediaType = item.MediaType == BookMediaType.Unknown ? MediaFileExtensions.GetMediaTypeForPath(item.Path) : item.MediaType;
+            var files = item.Book?.BookFiles?.Value?
+                .Where(f => mediaType == BookMediaType.Unknown || f.GetMediaType() == mediaType)
+                .ToList();
             if (files == null || !files.Any())
             {
                 // No existing books, skip.  This guards against new authors not having a QualityProfile.
@@ -34,7 +37,7 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Specifications
             }
 
             var downloadPropersAndRepacks = _configService.DownloadPropersAndRepacks;
-            var qualityComparer = new QualityModelComparer(item.Author.QualityProfile);
+            var qualityComparer = new QualityModelComparer(item.Author.GetQualityProfile(mediaType) ?? item.Author.QualityProfile.Value);
 
             foreach (var bookFile in files)
             {

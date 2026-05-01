@@ -19,6 +19,7 @@ namespace NzbDrone.Core.MediaFiles
         public string ReleaseGroup { get; set; }
         public QualityModel Quality { get; set; }
         public IndexerFlags IndexerFlags { get; set; }
+        public BookMediaType MediaType { get; set; }
         public MediaInfoModel MediaInfo { get; set; }
         public int EditionId { get; set; }
         public int CalibreId { get; set; }

@@ -44,6 +44,21 @@ namespace Readarr.Api.V1.Author
                     author.QualityProfileId = resource.QualityProfileId.Value;
                 }
 
+                if (resource.EbookQualityProfileId.HasValue)
+                {
+                    author.EbookQualityProfileId = resource.EbookQualityProfileId.Value;
+                }
+
+                if (resource.AudiobookQualityProfileId.HasValue)
+                {
+                    author.AudiobookQualityProfileId = resource.AudiobookQualityProfileId.Value;
+                }
+
+                if (resource.WantedMediaTypes.HasValue)
+                {
+                    author.WantedMediaTypes = resource.WantedMediaTypes.Value;
+                }
+
                 if (resource.MetadataProfileId.HasValue)
                 {
                     author.MetadataProfileId = resource.MetadataProfileId.Value;

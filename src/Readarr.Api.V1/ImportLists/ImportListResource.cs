@@ -1,6 +1,7 @@
 using System;
 using NzbDrone.Core.Books;
 using NzbDrone.Core.ImportLists;
+using NzbDrone.Core.MediaFiles;
 
 namespace Readarr.Api.V1.ImportLists
 {
@@ -13,6 +14,9 @@ namespace Readarr.Api.V1.ImportLists
         public string RootFolderPath { get; set; }
         public NewItemMonitorTypes MonitorNewItems { get; set; }
         public int QualityProfileId { get; set; }
+        public int EbookQualityProfileId { get; set; }
+        public int AudiobookQualityProfileId { get; set; }
+        public WantedMediaTypes WantedMediaTypes { get; set; }
         public int MetadataProfileId { get; set; }
         public ImportListType ListType { get; set; }
         public int ListOrder { get; set; }
@@ -37,6 +41,9 @@ namespace Readarr.Api.V1.ImportLists
             resource.RootFolderPath = definition.RootFolderPath;
             resource.MonitorNewItems = definition.MonitorNewItems;
             resource.QualityProfileId = definition.ProfileId;
+            resource.EbookQualityProfileId = definition.EbookProfileId == 0 ? definition.ProfileId : definition.EbookProfileId;
+            resource.AudiobookQualityProfileId = definition.AudiobookProfileId == 0 ? definition.ProfileId : definition.AudiobookProfileId;
+            resource.WantedMediaTypes = definition.WantedMediaTypes == WantedMediaTypes.None ? WantedMediaTypes.Ebook : definition.WantedMediaTypes;
             resource.MetadataProfileId = definition.MetadataProfileId;
             resource.ListType = definition.ListType;
             resource.ListOrder = (int)definition.ListType;
@@ -61,6 +68,9 @@ namespace Readarr.Api.V1.ImportLists
             definition.RootFolderPath = resource.RootFolderPath;
             definition.MonitorNewItems = resource.MonitorNewItems;
             definition.ProfileId = resource.QualityProfileId;
+            definition.EbookProfileId = resource.EbookQualityProfileId == 0 ? resource.QualityProfileId : resource.EbookQualityProfileId;
+            definition.AudiobookProfileId = resource.AudiobookQualityProfileId == 0 ? resource.QualityProfileId : resource.AudiobookQualityProfileId;
+            definition.WantedMediaTypes = resource.WantedMediaTypes == WantedMediaTypes.None ? WantedMediaTypes.Ebook : resource.WantedMediaTypes;
             definition.MetadataProfileId = resource.MetadataProfileId;
             definition.ListType = resource.ListType;
             definition.MinRefreshInterval = resource.MinRefreshInterval;

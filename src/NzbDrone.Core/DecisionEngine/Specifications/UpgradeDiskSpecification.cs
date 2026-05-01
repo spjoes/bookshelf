@@ -3,6 +3,7 @@ using NLog;
 using NzbDrone.Common.Cache;
 using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.IndexerSearch.Definitions;
+using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Parser.Model;
 
 namespace NzbDrone.Core.DecisionEngine.Specifications
@@ -28,7 +29,10 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
 
         public virtual Decision IsSatisfiedBy(RemoteBook subject, SearchCriteriaBase searchCriteria)
         {
-            foreach (var file in subject.Books.SelectMany(c => c.BookFiles.Value))
+            var mediaType = subject.MediaType == BookMediaType.Unknown ? subject.ParsedBookInfo.Quality.GetMediaType() : subject.MediaType;
+            var qualityProfile = subject.Author.GetQualityProfile(mediaType) ?? subject.Author.QualityProfile.Value;
+
+            foreach (var file in subject.Books.SelectMany(c => c.BookFiles.Value).Where(f => mediaType == BookMediaType.Unknown || f.GetMediaType() == mediaType))
             {
                 if (file == null)
                 {
@@ -37,7 +41,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
 
                 var customFormats = _formatService.ParseCustomFormat(file);
 
-                if (!_upgradableSpecification.IsUpgradable(subject.Author.QualityProfile,
+                if (!_upgradableSpecification.IsUpgradable(qualityProfile,
                                                            file.Quality,
                                                            customFormats,
                                                            subject.ParsedBookInfo.Quality,

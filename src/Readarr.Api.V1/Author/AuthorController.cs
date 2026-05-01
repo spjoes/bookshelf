@@ -73,6 +73,8 @@ namespace Readarr.Api.V1.Author
             _rootFolderService = rootFolderService;
 
             Http.Validation.RuleBuilderExtensions.ValidId(SharedValidator.RuleFor(s => s.QualityProfileId));
+            Http.Validation.RuleBuilderExtensions.ValidId(SharedValidator.RuleFor(s => s.EbookQualityProfileId));
+            Http.Validation.RuleBuilderExtensions.ValidId(SharedValidator.RuleFor(s => s.AudiobookQualityProfileId));
             Http.Validation.RuleBuilderExtensions.ValidId(SharedValidator.RuleFor(s => s.MetadataProfileId));
 
             SharedValidator.RuleFor(s => s.Path)
@@ -87,6 +89,8 @@ namespace Readarr.Api.V1.Author
                            .When(s => !s.Path.IsNullOrWhiteSpace());
 
             SharedValidator.RuleFor(s => s.QualityProfileId).SetValidator(qualityProfileExistsValidator);
+            SharedValidator.RuleFor(s => s.EbookQualityProfileId).SetValidator(qualityProfileExistsValidator);
+            SharedValidator.RuleFor(s => s.AudiobookQualityProfileId).SetValidator(qualityProfileExistsValidator);
             SharedValidator.RuleFor(s => s.MetadataProfileId).SetValidator(metadataProfileExistsValidator);
 
             PostValidator.RuleFor(s => s.Path).IsValidPath().When(s => s.RootFolderPath.IsNullOrWhiteSpace());

@@ -9,6 +9,7 @@ using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.DecisionEngine.Specifications;
 using NzbDrone.Core.Download.Aggregation;
 using NzbDrone.Core.IndexerSearch.Definitions;
+using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Qualities;
@@ -119,6 +120,8 @@ namespace NzbDrone.Core.DecisionEngine
                             remoteBook.ParsedBookInfo.Quality = QualityParser.ParseQuality(report.Title, null, report.Categories);
                         }
 
+                        remoteBook.MediaType = searchCriteria != null && searchCriteria.MediaType != BookMediaType.Unknown ? searchCriteria.MediaType : remoteBook.ParsedBookInfo.Quality.GetMediaType();
+
                         if (remoteBook.Author == null)
                         {
                             decision = new DownloadDecision(remoteBook, new Rejection("Unknown Author"));
@@ -143,7 +146,7 @@ namespace NzbDrone.Core.DecisionEngine
                             _aggregationService.Augment(remoteBook);
 
                             remoteBook.CustomFormats = _formatCalculator.ParseCustomFormat(remoteBook, remoteBook.Release.Size);
-                            remoteBook.CustomFormatScore = remoteBook?.Author?.QualityProfile?.Value.CalculateCustomFormatScore(remoteBook.CustomFormats) ?? 0;
+                            remoteBook.CustomFormatScore = (remoteBook?.Author?.GetQualityProfile(remoteBook.MediaType) ?? remoteBook?.Author?.QualityProfile?.Value)?.CalculateCustomFormatScore(remoteBook.CustomFormats) ?? 0;
 
                             remoteBook.DownloadAllowed = remoteBook.Books.Any();
                             decision = GetDecisionForReport(remoteBook, searchCriteria);

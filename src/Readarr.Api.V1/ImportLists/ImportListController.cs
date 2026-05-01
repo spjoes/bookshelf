@@ -17,10 +17,14 @@ namespace Readarr.Api.V1.ImportLists
             : base(importListFactory, "importlist", ResourceMapper, BulkResourceMapper)
         {
             Http.Validation.RuleBuilderExtensions.ValidId(SharedValidator.RuleFor(s => s.QualityProfileId));
+            Http.Validation.RuleBuilderExtensions.ValidId(SharedValidator.RuleFor(s => s.EbookQualityProfileId));
+            Http.Validation.RuleBuilderExtensions.ValidId(SharedValidator.RuleFor(s => s.AudiobookQualityProfileId));
             Http.Validation.RuleBuilderExtensions.ValidId(SharedValidator.RuleFor(s => s.MetadataProfileId));
 
             SharedValidator.RuleFor(c => c.RootFolderPath).IsValidPath();
             SharedValidator.RuleFor(c => c.QualityProfileId).SetValidator(qualityProfileExistsValidator);
+            SharedValidator.RuleFor(c => c.EbookQualityProfileId).SetValidator(qualityProfileExistsValidator);
+            SharedValidator.RuleFor(c => c.AudiobookQualityProfileId).SetValidator(qualityProfileExistsValidator);
             SharedValidator.RuleFor(c => c.MetadataProfileId).SetValidator(metadataProfileExistsValidator);
         }
     }

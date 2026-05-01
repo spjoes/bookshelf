@@ -35,6 +35,9 @@ export const defaultState = {
     monitor: monitorOptions[0].key,
     monitorNewItems: monitorNewItemsOptions[0].key,
     qualityProfileId: 0,
+    ebookQualityProfileId: 0,
+    audiobookQualityProfileId: 0,
+    wantedMediaTypes: 1,
     metadataProfileId: 0,
     tags: []
   },
@@ -44,6 +47,9 @@ export const defaultState = {
     monitor: monitorOptions[0].key,
     monitorNewItems: monitorNewItemsOptions[0].key,
     qualityProfileId: 0,
+    ebookQualityProfileId: 0,
+    audiobookQualityProfileId: 0,
+    wantedMediaTypes: 1,
     metadataProfileId: 0,
     tags: []
   }

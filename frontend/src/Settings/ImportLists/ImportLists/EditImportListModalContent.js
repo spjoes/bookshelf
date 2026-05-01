@@ -85,6 +85,9 @@ function EditImportListModalContent(props) {
     rootFolderPath,
     monitorNewItems,
     qualityProfileId,
+    ebookQualityProfileId,
+    audiobookQualityProfileId,
+    wantedMediaTypes,
     metadataProfileId,
     tags,
     fields,
@@ -310,7 +313,53 @@ function EditImportListModalContent(props) {
 
                 <FormGroup>
                   <FormLabel>
-                    {translate('QualityProfile')}
+                    Wanted Media
+                  </FormLabel>
+
+                  <FormInputGroup
+                    type={inputTypes.SELECT}
+                    name="wantedMediaTypes"
+                    values={[
+                      { key: 1, value: 'eBook' },
+                      { key: 2, value: 'Audiobook' },
+                      { key: 3, value: 'eBook and Audiobook' }
+                    ]}
+                    {...wantedMediaTypes}
+                    onChange={onInputChange}
+                  />
+                </FormGroup>
+
+                <FormGroup>
+                  <FormLabel>
+                    eBook Quality Profile
+                  </FormLabel>
+
+                  <FormInputGroup
+                    type={inputTypes.QUALITY_PROFILE_SELECT}
+                    name="ebookQualityProfileId"
+                    helpText={translate('QualityProfileIdHelpText')}
+                    {...ebookQualityProfileId}
+                    onChange={onInputChange}
+                  />
+                </FormGroup>
+
+                <FormGroup>
+                  <FormLabel>
+                    Audiobook Quality Profile
+                  </FormLabel>
+
+                  <FormInputGroup
+                    type={inputTypes.QUALITY_PROFILE_SELECT}
+                    name="audiobookQualityProfileId"
+                    helpText={translate('QualityProfileIdHelpText')}
+                    {...audiobookQualityProfileId}
+                    onChange={onInputChange}
+                  />
+                </FormGroup>
+
+                <FormGroup>
+                  <FormLabel>
+                    {translate('LegacyQualityProfile')}
                   </FormLabel>
 
                   <FormInputGroup

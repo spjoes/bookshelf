@@ -17,6 +17,7 @@ namespace Readarr.Api.V1.BookFiles
         public DateTime DateAdded { get; set; }
         public QualityModel Quality { get; set; }
         public int QualityWeight { get; set; }
+        public BookMediaType MediaType { get; set; }
         public int? IndexerFlags { get; set; }
         public MediaInfoResource MediaInfo { get; set; }
 
@@ -55,6 +56,7 @@ namespace Readarr.Api.V1.BookFiles
                 DateAdded = model.DateAdded,
                 Quality = model.Quality,
                 QualityWeight = QualityWeight(model.Quality),
+                MediaType = model.GetMediaType(),
                 MediaInfo = model.MediaInfo.ToResource()
             };
         }
@@ -77,8 +79,9 @@ namespace Readarr.Api.V1.BookFiles
                 DateAdded = model.DateAdded,
                 Quality = model.Quality,
                 QualityWeight = QualityWeight(model.Quality),
+                MediaType = model.GetMediaType(),
                 MediaInfo = model.MediaInfo.ToResource(),
-                QualityCutoffNotMet = upgradableSpecification.QualityCutoffNotMet(author.QualityProfile.Value, model.Quality),
+                QualityCutoffNotMet = upgradableSpecification.QualityCutoffNotMet(author.GetQualityProfile(model.GetMediaType()) ?? author.QualityProfile.Value, model.Quality),
                 IndexerFlags = (int)model.IndexerFlags
             };
         }

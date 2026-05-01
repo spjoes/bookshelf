@@ -6,6 +6,7 @@ using NzbDrone.Core.Configuration;
 using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.History;
 using NzbDrone.Core.IndexerSearch.Definitions;
+using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Qualities;
 
@@ -48,11 +49,17 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.RssSync
             _logger.Debug("Performing history status check on report");
             foreach (var book in subject.Books)
             {
+                var mediaType = subject.MediaType == BookMediaType.Unknown ? subject.ParsedBookInfo.Quality.GetMediaType() : subject.MediaType;
                 _logger.Debug("Checking current status of book [{0}] in history", book.Id);
                 var mostRecent = _historyService.MostRecentForBook(book.Id);
 
                 if (mostRecent != null && mostRecent.EventType == EntityHistoryEventType.Grabbed)
                 {
+                    if (mediaType != BookMediaType.Unknown && mostRecent.Quality.GetMediaType() != BookMediaType.Unknown && mostRecent.Quality.GetMediaType() != mediaType)
+                    {
+                        continue;
+                    }
+
                     var recent = mostRecent.Date.After(DateTime.UtcNow.AddHours(-12));
 
                     if (!recent && cdhEnabled)
@@ -61,17 +68,18 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.RssSync
                     }
 
                     var customFormats = _formatService.ParseCustomFormat(mostRecent, subject.Author);
+                    var qualityProfile = subject.Author.GetQualityProfile(mediaType) ?? subject.Author.QualityProfile.Value;
 
                     // The series will be the same as the one in history since it's the same episode.
                     // Instead of fetching the series from the DB reuse the known series.
                     var cutoffUnmet = _upgradableSpecification.CutoffNotMet(
-                        subject.Author.QualityProfile,
+                        qualityProfile,
                         new List<QualityModel> { mostRecent.Quality },
                         customFormats,
                         subject.ParsedBookInfo.Quality);
 
                     var upgradeable = _upgradableSpecification.IsUpgradable(
-                        subject.Author.QualityProfile,
+                        qualityProfile,
                         mostRecent.Quality,
                         customFormats,
                         subject.ParsedBookInfo.Quality,

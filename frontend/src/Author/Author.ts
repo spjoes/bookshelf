@@ -9,6 +9,9 @@ interface Author extends ModelBase {
   overview: string;
   path: string;
   qualityProfileId: number;
+  ebookQualityProfileId: number;
+  audiobookQualityProfileId: number;
+  wantedMediaTypes: number;
   metadataProfileId: number;
   rootFolderPath: string;
   sortName: string;

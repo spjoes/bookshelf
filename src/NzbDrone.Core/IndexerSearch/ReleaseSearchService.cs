@@ -9,6 +9,7 @@ using NzbDrone.Core.Books;
 using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.Indexers;
 using NzbDrone.Core.IndexerSearch.Definitions;
+using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Parser.Model;
 
 namespace NzbDrone.Core.IndexerSearch
@@ -45,9 +46,14 @@ namespace NzbDrone.Core.IndexerSearch
             var downloadDecisions = new List<DownloadDecision>();
 
             var book = _bookService.GetBook(bookId);
+            var author = _authorService.GetAuthor(book.AuthorId);
+            var mediaTypes = author.WantedMediaTypes == WantedMediaTypes.None ? new List<BookMediaType> { BookMediaType.Unknown } : author.WantedMediaTypes.ToMediaTypes();
 
-            var decisions = await BookSearch(book, missingOnly, userInvokedSearch, interactiveSearch);
-            downloadDecisions.AddRange(decisions);
+            foreach (var mediaType in mediaTypes)
+            {
+                var decisions = await BookSearch(book, missingOnly, userInvokedSearch, interactiveSearch, mediaType);
+                downloadDecisions.AddRange(decisions);
+            }
 
             return DeDupeDecisions(downloadDecisions);
         }
@@ -76,13 +82,17 @@ namespace NzbDrone.Core.IndexerSearch
             return await Dispatch(indexer => indexer.Fetch(searchSpec), searchSpec);
         }
 
-        public async Task<List<DownloadDecision>> BookSearch(Book book, bool missingOnly, bool userInvokedSearch, bool interactiveSearch)
+        public async Task<List<DownloadDecision>> BookSearch(Book book, bool missingOnly, bool userInvokedSearch, bool interactiveSearch, BookMediaType mediaType = BookMediaType.Unknown)
         {
             var author = _authorService.GetAuthor(book.AuthorId);
 
             var searchSpec = Get<BookSearchCriteria>(author, new List<Book> { book }, userInvokedSearch, interactiveSearch);
+            searchSpec.MediaType = mediaType;
 
-            searchSpec.BookTitle = book.Editions.Value.SingleOrDefault(x => x.Monitored).Title;
+            searchSpec.BookTitle = book.Editions.Value
+                .Where(x => x.Monitored)
+                .OrderByDescending(x => x.GetMediaType() == mediaType)
+                .FirstOrDefault()?.Title ?? book.Title;
 
             // searchSpec.BookIsbn = book.Isbn13;
             if (book.ReleaseDate.HasValue)

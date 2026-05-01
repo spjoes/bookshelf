@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using NzbDrone.Core.ImportLists;
+using NzbDrone.Core.MediaFiles;
 
 namespace Readarr.Api.V1.ImportLists
 {
@@ -8,6 +9,9 @@ namespace Readarr.Api.V1.ImportLists
         public bool? EnableAutomaticAdd { get; set; }
         public string RootFolderPath { get; set; }
         public int? QualityProfileId { get; set; }
+        public int? EbookQualityProfileId { get; set; }
+        public int? AudiobookQualityProfileId { get; set; }
+        public WantedMediaTypes? WantedMediaTypes { get; set; }
         public int? MetadataProfileId { get; set; }
     }
 
@@ -25,6 +29,9 @@ namespace Readarr.Api.V1.ImportLists
                 existing.EnableAutomaticAdd = resource.EnableAutomaticAdd ?? existing.EnableAutomaticAdd;
                 existing.RootFolderPath = resource.RootFolderPath ?? existing.RootFolderPath;
                 existing.ProfileId = resource.QualityProfileId ?? existing.ProfileId;
+                existing.EbookProfileId = resource.EbookQualityProfileId ?? existing.EbookProfileId;
+                existing.AudiobookProfileId = resource.AudiobookQualityProfileId ?? existing.AudiobookProfileId;
+                existing.WantedMediaTypes = resource.WantedMediaTypes ?? existing.WantedMediaTypes;
                 existing.MetadataProfileId = resource.MetadataProfileId ?? existing.MetadataProfileId;
             });
 

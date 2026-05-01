@@ -41,7 +41,8 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.RssSync
                 return Decision.Accept();
             }
 
-            var qualityProfile = subject.Author.QualityProfile.Value;
+            var mediaType = subject.MediaType == BookMediaType.Unknown ? subject.ParsedBookInfo.Quality.GetMediaType() : subject.MediaType;
+            var qualityProfile = subject.Author.GetQualityProfile(mediaType) ?? subject.Author.QualityProfile.Value;
             var delayProfile = _delayProfileService.BestForTags(subject.Author.Tags);
             var delay = delayProfile.GetProtocolDelay(subject.Release.DownloadProtocol);
             var isPreferredProtocol = subject.Release.DownloadProtocol == delayProfile.PreferredProtocol;
@@ -58,7 +59,9 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.RssSync
             {
                 foreach (var book in subject.Books)
                 {
-                    var bookFiles = _mediaFileService.GetFilesByBook(book.Id);
+                    var bookFiles = _mediaFileService.GetFilesByBook(book.Id)
+                        .Where(f => mediaType == BookMediaType.Unknown || f.GetMediaType() == mediaType)
+                        .ToList();
 
                     foreach (var file in bookFiles)
                     {

@@ -5,6 +5,7 @@ using NzbDrone.Core.Configuration;
 using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.Download.TrackedDownloads;
 using NzbDrone.Core.IndexerSearch.Definitions;
+using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Qualities;
 using NzbDrone.Core.Queue;
@@ -38,15 +39,17 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
         public Decision IsSatisfiedBy(RemoteBook subject, SearchCriteriaBase searchCriteria)
         {
             var queue = _queueService.GetQueue();
+            var mediaType = subject.MediaType == BookMediaType.Unknown ? subject.ParsedBookInfo.Quality.GetMediaType() : subject.MediaType;
             var matchingBook = queue.Where(q => q.RemoteBook?.Author != null &&
                                                  q.RemoteBook.Author.Id == subject.Author.Id &&
-                                                 q.RemoteBook.Books.Select(e => e.Id).Intersect(subject.Books.Select(e => e.Id)).Any())
+                                                 q.RemoteBook.Books.Select(e => e.Id).Intersect(subject.Books.Select(e => e.Id)).Any() &&
+                                                 (mediaType == BookMediaType.Unknown || q.RemoteBook.MediaType == BookMediaType.Unknown || q.RemoteBook.MediaType == mediaType))
                            .ToList();
 
             foreach (var queueItem in matchingBook)
             {
                 var remoteBook = queueItem.RemoteBook;
-                var qualityProfile = subject.Author.QualityProfile.Value;
+                var qualityProfile = subject.Author.GetQualityProfile(mediaType) ?? subject.Author.QualityProfile.Value;
 
                 // To avoid a race make sure it's not FailedPending (failed awaiting removal/search).
                 // Failed items (already searching for a replacement) won't be part of the queue since

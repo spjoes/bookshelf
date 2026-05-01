@@ -4,6 +4,7 @@ using System.Linq;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Http;
 using NzbDrone.Core.IndexerSearch.Definitions;
+using NzbDrone.Core.MediaFiles;
 
 namespace NzbDrone.Core.Indexers.Newznab
 {
@@ -73,19 +74,19 @@ namespace NzbDrone.Core.Indexers.Newznab
                 pageableRequests.AddTier();
 
                 pageableRequests.Add(GetPagedRequests(MaxPages,
-                    Settings.Categories,
+                    GetCategories(searchCriteria),
                     "search",
                     $"&q={NewsnabifyTitle(searchCriteria.BookQuery)}+{NewsnabifyTitle(searchCriteria.AuthorQuery)}"));
 
                 pageableRequests.Add(GetPagedRequests(MaxPages,
-                    Settings.Categories,
+                    GetCategories(searchCriteria),
                     "search",
                     $"&q={NewsnabifyTitle(searchCriteria.AuthorQuery)}+{NewsnabifyTitle(searchCriteria.BookQuery)}"));
 
                 pageableRequests.AddTier();
 
                 pageableRequests.Add(GetPagedRequests(MaxPages,
-                    Settings.Categories,
+                    GetCategories(searchCriteria),
                     "search",
                     $"&q={NewsnabifyTitle(searchCriteria.BookQuery)}"));
             }
@@ -121,7 +122,24 @@ namespace NzbDrone.Core.Indexers.Newznab
         {
             chain.AddTier();
 
-            chain.Add(GetPagedRequests(MaxPages, Settings.Categories, "book", $"{parameters}"));
+            chain.Add(GetPagedRequests(MaxPages, GetCategories(searchCriteria), "book", $"{parameters}"));
+        }
+
+        private IEnumerable<int> GetCategories(SearchCriteriaBase searchCriteria)
+        {
+            if (searchCriteria?.MediaType == BookMediaType.Audiobook)
+            {
+                var audioCategories = Settings.Categories.Where(c => c >= 3000 && c < 4000).ToList();
+                return audioCategories.Any() ? audioCategories : Settings.Categories;
+            }
+
+            if (searchCriteria?.MediaType == BookMediaType.Ebook)
+            {
+                var bookCategories = Settings.Categories.Where(c => c >= 7000 && c < 8000).ToList();
+                return bookCategories.Any() ? bookCategories : Settings.Categories;
+            }
+
+            return Settings.Categories;
         }
 
         private IEnumerable<IndexerRequest> GetPagedRequests(int maxPages, IEnumerable<int> categories, string searchType, string parameters)

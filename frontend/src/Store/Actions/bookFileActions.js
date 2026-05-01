@@ -63,6 +63,12 @@ export const defaultState = {
       isVisible: true
     },
     {
+      name: 'mediaType',
+      label: 'Media',
+      isSortable: true,
+      isVisible: true
+    },
+    {
       name: 'dateAdded',
       label: 'Date Added',
       isSortable: true,

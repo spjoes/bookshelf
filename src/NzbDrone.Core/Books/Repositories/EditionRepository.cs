@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NzbDrone.Common.EnsureThat;
 using NzbDrone.Core.Datastore;
+using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Messaging.Events;
 
 namespace NzbDrone.Core.Books
@@ -96,8 +97,19 @@ namespace NzbDrone.Core.Books
         public List<Edition> SetMonitored(Edition edition)
         {
             var allEditions = FindByBook(new[] { edition.BookId });
-            allEditions.ForEach(r => r.Monitored = r.Id == edition.Id);
-            Ensure.That(allEditions.Count(x => x.Monitored) == 1).IsTrue();
+            var mediaType = edition.GetMediaType();
+
+            foreach (var candidate in allEditions)
+            {
+                var candidateMediaType = candidate.GetMediaType();
+
+                if (mediaType == BookMediaType.Unknown || candidateMediaType == BookMediaType.Unknown || candidateMediaType == mediaType)
+                {
+                    candidate.Monitored = candidate.Id == edition.Id;
+                }
+            }
+
+            Ensure.That(allEditions.Count(x => x.Monitored && (mediaType == BookMediaType.Unknown || x.GetMediaType() == mediaType || x.GetMediaType() == BookMediaType.Unknown)) == 1).IsTrue();
             UpdateMany(allEditions);
             return allEditions;
         }

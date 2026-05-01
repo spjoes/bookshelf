@@ -17,7 +17,10 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Specifications
 
         public Decision IsSatisfiedBy(LocalBook localBook, DownloadClientItem downloadClientItem)
         {
-            var bookFiles = localBook.Book?.BookFiles?.Value;
+            var mediaType = localBook.MediaType == BookMediaType.Unknown ? MediaFileExtensions.GetMediaTypeForPath(localBook.Path) : localBook.MediaType;
+            var bookFiles = localBook.Book?.BookFiles?.Value?
+                .Where(f => mediaType == BookMediaType.Unknown || f.GetMediaType() == mediaType)
+                .ToList();
 
             if (bookFiles == null || !bookFiles.Any())
             {

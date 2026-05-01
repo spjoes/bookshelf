@@ -56,6 +56,8 @@ namespace Readarr.Api.V1.Books
 
             PostValidator.RuleFor(s => s.ForeignBookId).NotEmpty();
             PostValidator.RuleFor(s => s.Author.QualityProfileId).SetValidator(qualityProfileExistsValidator);
+            PostValidator.RuleFor(s => s.Author.EbookQualityProfileId).SetValidator(qualityProfileExistsValidator);
+            PostValidator.RuleFor(s => s.Author.AudiobookQualityProfileId).SetValidator(qualityProfileExistsValidator);
             PostValidator.RuleFor(s => s.Author.MetadataProfileId).SetValidator(metadataProfileExistsValidator);
             PostValidator.RuleFor(s => s.Author.RootFolderPath).IsValidPath().When(s => s.Author.Path.IsNullOrWhiteSpace());
             PostValidator.RuleFor(s => s.Author.ForeignAuthorId).NotEmpty();
@@ -143,7 +145,7 @@ namespace Readarr.Api.V1.Books
         [HttpGet("{id:int}/overview")]
         public object Overview(int id)
         {
-            var overview = _editionService.GetEditionsByBook(id).Single(x => x.Monitored).Overview;
+            var overview = _editionService.GetEditionsByBook(id).First(x => x.Monitored).Overview;
             return new
             {
                 id,

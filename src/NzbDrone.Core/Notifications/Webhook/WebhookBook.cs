@@ -16,7 +16,7 @@ namespace NzbDrone.Core.Notifications.Webhook
             GoodreadsId = book.ForeignBookId;
             Title = book.Title;
             ReleaseDate = book.ReleaseDate;
-            Edition = new WebhookBookEdition(book.Editions.Value.Single(e => e.Monitored));
+            Edition = new WebhookBookEdition(book.Editions.Value.First(e => e.Monitored));
         }
 
         public int Id { get; set; }

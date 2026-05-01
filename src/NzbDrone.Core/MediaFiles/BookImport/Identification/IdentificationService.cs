@@ -114,7 +114,8 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Identification
                 FileTrackInfo = _metadataTagService.ReadTags((FileInfoBase)new FileInfo(x.Path)),
                 ExistingFile = true,
                 AdditionalFile = true,
-                Quality = x.Quality
+                Quality = x.Quality,
+                MediaType = x.GetMediaType()
             }))
             .ToList();
 
@@ -132,8 +133,9 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Identification
 
             // convert all the TrackFiles that represent extra files to List<LocalTrack>
             // local candidates are actually a list so this is fine to enumerate
+            var mediaType = localBookRelease.LocalBooks.First().MediaType;
             var allLocalTracks = ToLocalTrack(candidateReleases
-                .SelectMany(x => x.ExistingFiles)
+                .SelectMany(x => x.ExistingFiles.Where(f => mediaType == BookMediaType.Unknown || f.GetMediaType() == mediaType))
                 .DistinctBy(x => x.Path), localBookRelease);
 
             _logger.Debug($"Retrieved {allLocalTracks.Count} possible tracks in {watch.ElapsedMilliseconds}ms");
@@ -206,7 +208,10 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Identification
                 _logger.Debug($"Trying Release {release}");
                 var rwatch = System.Diagnostics.Stopwatch.StartNew();
 
-                var extraTrackPaths = candidateRelease.ExistingFiles.Select(x => x.Path).ToList();
+                var extraTrackPaths = candidateRelease.ExistingFiles
+                    .Where(f => localBookRelease.LocalBooks.First().MediaType == BookMediaType.Unknown || f.GetMediaType() == localBookRelease.LocalBooks.First().MediaType)
+                    .Select(x => x.Path)
+                    .ToList();
                 var extraTracks = extraTracksOnDisk.Where(x => extraTrackPaths.Contains(x.Path)).ToList();
                 var allLocalTracks = localBookRelease.LocalBooks.Concat(extraTracks).DistinctBy(x => x.Path).ToList();
 

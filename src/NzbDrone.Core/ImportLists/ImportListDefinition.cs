@@ -1,5 +1,6 @@
 using System;
 using NzbDrone.Core.Books;
+using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.ThingiProvider;
 
 namespace NzbDrone.Core.ImportLists
@@ -12,6 +13,9 @@ namespace NzbDrone.Core.ImportLists
         public bool ShouldSearch { get; set; }
         public NewItemMonitorTypes MonitorNewItems { get; set; }
         public int ProfileId { get; set; }
+        public int EbookProfileId { get; set; }
+        public int AudiobookProfileId { get; set; }
+        public WantedMediaTypes WantedMediaTypes { get; set; }
         public int MetadataProfileId { get; set; }
         public string RootFolderPath { get; set; }
 

@@ -117,6 +117,7 @@ namespace NzbDrone.Core.MediaFiles.BookImport
                     Size = file.Length,
                     Modified = file.LastWriteTimeUtc,
                     FileTrackInfo = fileTrackInfo,
+                    MediaType = MediaFileExtensions.GetMediaTypeForExtension(file.Extension),
                     AdditionalFile = false
                 };
 
@@ -186,11 +187,18 @@ namespace NzbDrone.Core.MediaFiles.BookImport
             if (edition.Edition != null && edition.Edition.Book.Value.Author.Value.QualityProfileId == 0)
             {
                 var rootFolder = _rootFolderService.GetBestRootFolder(edition.LocalBooks.First().Path);
-                var qualityProfile = _qualityProfileService.Get(rootFolder.DefaultQualityProfileId);
+                var mediaType = edition.LocalBooks.First().MediaType;
+                var profileId = mediaType == BookMediaType.Audiobook && rootFolder.DefaultAudiobookQualityProfileId > 0 ?
+                    rootFolder.DefaultAudiobookQualityProfileId :
+                    rootFolder.DefaultEbookQualityProfileId > 0 ? rootFolder.DefaultEbookQualityProfileId : rootFolder.DefaultQualityProfileId;
+                var qualityProfile = _qualityProfileService.Get(profileId);
 
                 var author = edition.Edition.Book.Value.Author.Value;
                 author.QualityProfileId = qualityProfile.Id;
                 author.QualityProfile = qualityProfile;
+                author.EbookQualityProfileId = rootFolder.DefaultEbookQualityProfileId == 0 ? rootFolder.DefaultQualityProfileId : rootFolder.DefaultEbookQualityProfileId;
+                author.AudiobookQualityProfileId = rootFolder.DefaultAudiobookQualityProfileId == 0 ? rootFolder.DefaultQualityProfileId : rootFolder.DefaultAudiobookQualityProfileId;
+                author.WantedMediaTypes = rootFolder.DefaultWantedMediaTypes == WantedMediaTypes.None ? edition.LocalBooks.First().MediaType.ToWantedMediaType() : rootFolder.DefaultWantedMediaTypes;
             }
         }
 

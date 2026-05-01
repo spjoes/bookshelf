@@ -19,7 +19,7 @@ namespace NzbDrone.Core.Notifications.Goodreads
 
         public override void OnReleaseImport(BookDownloadMessage message)
         {
-            var bookId = message.Book.Editions.Value.Single(x => x.Monitored).ForeignEditionId;
+            var bookId = message.Book.Editions.Value.First(x => x.Monitored).ForeignEditionId;
             AddOwnedBook(bookId);
         }
 

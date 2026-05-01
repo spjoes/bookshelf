@@ -47,7 +47,10 @@ namespace NzbDrone.Core.MediaFiles
         public BookFileMoveResult UpgradeBookFile(BookFile bookFile, LocalBook localBook, bool copyOnly = false)
         {
             var moveFileResult = new BookFileMoveResult();
-            var existingFiles = localBook.Book.BookFiles.Value;
+            var mediaType = localBook.MediaType == BookMediaType.Unknown ? MediaFileExtensions.GetMediaTypeForPath(localBook.Path) : localBook.MediaType;
+            var existingFiles = localBook.Book.BookFiles.Value
+                .Where(f => mediaType == BookMediaType.Unknown || f.GetMediaType() == mediaType)
+                .ToList();
 
             var rootFolderPath = _diskProvider.GetParentFolder(localBook.Author.Path);
             var rootFolder = _rootFolderService.GetBestRootFolder(rootFolderPath);

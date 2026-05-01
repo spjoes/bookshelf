@@ -4,6 +4,7 @@ using System.Linq;
 using NzbDrone.Core.Books;
 using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.Download.Clients;
+using NzbDrone.Core.MediaFiles;
 
 namespace NzbDrone.Core.Parser.Model
 {
@@ -18,6 +19,7 @@ namespace NzbDrone.Core.Parser.Model
         public List<CustomFormat> CustomFormats { get; set; }
         public int CustomFormatScore { get; set; }
         public ReleaseSourceType ReleaseSource { get; set; }
+        public BookMediaType MediaType { get; set; }
 
         public RemoteBook()
         {

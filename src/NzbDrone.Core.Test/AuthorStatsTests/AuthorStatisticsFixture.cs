@@ -126,5 +126,24 @@ namespace NzbDrone.Core.Test.AuthorStatsTests
             bookStats.SizeOnDisk.Should().Be(_bookFiles.Sum(x => x.Size));
             bookStats.BookFileCount.Should().Be(2);
         }
+
+        [Test]
+        public void should_require_each_wanted_media_type_for_availability()
+        {
+            _author.WantedMediaTypes = WantedMediaTypes.All;
+            Db.Update(_author);
+
+            _bookFiles[0].MediaType = BookMediaType.Ebook;
+            _bookFiles[0].Quality = new QualityModel(Quality.EPUB);
+            Db.Insert(_bookFiles[0]);
+
+            Subject.AuthorStatistics().First().AvailableBookCount.Should().Be(0);
+
+            _bookFiles[1].MediaType = BookMediaType.Audiobook;
+            _bookFiles[1].Quality = new QualityModel(Quality.MP3);
+            Db.Insert(_bookFiles[1]);
+
+            Subject.AuthorStatistics().First().AvailableBookCount.Should().Be(1);
+        }
     }
 }

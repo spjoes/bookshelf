@@ -27,6 +27,8 @@ namespace NzbDrone.Core.Books
                                 .SetValidator(authorAncestorValidator);
 
             RuleFor(c => c.QualityProfileId).SetValidator(qualityProfileExistsValidator);
+            RuleFor(c => c.EbookQualityProfileId).SetValidator(qualityProfileExistsValidator);
+            RuleFor(c => c.AudiobookQualityProfileId).SetValidator(qualityProfileExistsValidator);
 
             RuleFor(c => c.MetadataProfileId).SetValidator(metadataProfileExistsValidator);
         }

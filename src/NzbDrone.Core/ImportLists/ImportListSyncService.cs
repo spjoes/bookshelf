@@ -298,6 +298,9 @@ namespace NzbDrone.Core.ImportLists
                     MonitorNewItems = importList.MonitorNewItems,
                     RootFolderPath = importList.RootFolderPath,
                     QualityProfileId = importList.ProfileId,
+                    EbookQualityProfileId = importList.EbookProfileId == 0 ? importList.ProfileId : importList.EbookProfileId,
+                    AudiobookQualityProfileId = importList.AudiobookProfileId == 0 ? importList.ProfileId : importList.AudiobookProfileId,
+                    WantedMediaTypes = importList.WantedMediaTypes,
                     MetadataProfileId = importList.MetadataProfileId,
                     Tags = importList.Tags,
                     AddOptions = new AddAuthorOptions
@@ -418,6 +421,9 @@ namespace NzbDrone.Core.ImportLists
                 MonitorNewItems = importList.MonitorNewItems,
                 RootFolderPath = importList.RootFolderPath,
                 QualityProfileId = importList.ProfileId,
+                EbookQualityProfileId = importList.EbookProfileId == 0 ? importList.ProfileId : importList.EbookProfileId,
+                AudiobookQualityProfileId = importList.AudiobookProfileId == 0 ? importList.ProfileId : importList.AudiobookProfileId,
+                WantedMediaTypes = importList.WantedMediaTypes,
                 MetadataProfileId = importList.MetadataProfileId,
                 Tags = importList.Tags,
                 AddOptions = new AddAuthorOptions

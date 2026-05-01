@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Books;
 using NzbDrone.Core.MediaCover;
+using NzbDrone.Core.MediaFiles;
 using Readarr.Http.REST;
 
 namespace Readarr.Api.V1.Author
@@ -38,6 +39,9 @@ namespace Readarr.Api.V1.Author
         //View & Edit
         public string Path { get; set; }
         public int QualityProfileId { get; set; }
+        public int EbookQualityProfileId { get; set; }
+        public int AudiobookQualityProfileId { get; set; }
+        public WantedMediaTypes WantedMediaTypes { get; set; }
         public int MetadataProfileId { get; set; }
 
         //Editing Only
@@ -88,6 +92,9 @@ namespace Readarr.Api.V1.Author
 
                 Path = model.Path,
                 QualityProfileId = model.QualityProfileId,
+                EbookQualityProfileId = model.EbookQualityProfileId == 0 ? model.QualityProfileId : model.EbookQualityProfileId,
+                AudiobookQualityProfileId = model.AudiobookQualityProfileId == 0 ? model.QualityProfileId : model.AudiobookQualityProfileId,
+                WantedMediaTypes = model.WantedMediaTypes == WantedMediaTypes.None ? WantedMediaTypes.Ebook : model.WantedMediaTypes,
                 MetadataProfileId = model.MetadataProfileId,
                 Links = model.Metadata.Value.Links,
 
@@ -140,6 +147,9 @@ namespace Readarr.Api.V1.Author
                 //AlternateTitles
                 Path = resource.Path,
                 QualityProfileId = resource.QualityProfileId,
+                EbookQualityProfileId = resource.EbookQualityProfileId == 0 ? resource.QualityProfileId : resource.EbookQualityProfileId,
+                AudiobookQualityProfileId = resource.AudiobookQualityProfileId == 0 ? resource.QualityProfileId : resource.AudiobookQualityProfileId,
+                WantedMediaTypes = resource.WantedMediaTypes == WantedMediaTypes.None ? WantedMediaTypes.Ebook : resource.WantedMediaTypes,
                 MetadataProfileId = resource.MetadataProfileId,
 
                 Monitored = resource.Monitored,

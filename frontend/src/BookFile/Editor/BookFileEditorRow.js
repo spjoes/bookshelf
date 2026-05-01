@@ -14,6 +14,7 @@ function BookFileEditorRow(props) {
     id,
     path,
     size,
+    mediaType,
     dateAdded,
     quality,
     qualityCutoffNotMet,
@@ -39,6 +40,10 @@ function BookFileEditorRow(props) {
         className={styles.size}
       >
         {formatBytes(size)}
+      </TableRowCell>
+
+      <TableRowCell>
+        {mediaType === 'audiobook' || mediaType === 2 ? 'Audiobook' : 'eBook'}
       </TableRowCell>
 
       <RelativeDateCellConnector
@@ -68,6 +73,7 @@ BookFileEditorRow.propTypes = {
   id: PropTypes.number.isRequired,
   path: PropTypes.string.isRequired,
   size: PropTypes.number.isRequired,
+  mediaType: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
   quality: PropTypes.object.isRequired,
   qualityCutoffNotMet: PropTypes.bool.isRequired,
   dateAdded: PropTypes.string.isRequired,

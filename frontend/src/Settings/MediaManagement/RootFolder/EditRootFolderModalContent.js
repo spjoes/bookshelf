@@ -44,6 +44,9 @@ function EditRootFolderModalContent(props) {
     name,
     path,
     defaultQualityProfileId,
+    defaultEbookQualityProfileId,
+    defaultAudiobookQualityProfileId,
+    defaultWantedMediaTypes,
     defaultMetadataProfileId,
     defaultMonitorOption,
     defaultNewItemMonitorOption,
@@ -170,7 +173,53 @@ function EditRootFolderModalContent(props) {
 
                 <FormGroup>
                   <FormLabel>
-                    {translate('QualityProfile')}
+                    {translate('WantedMedia')}
+                  </FormLabel>
+
+                  <FormInputGroup
+                    type={inputTypes.SELECT}
+                    name="defaultWantedMediaTypes"
+                    values={[
+                      { key: 1, value: 'eBook' },
+                      { key: 2, value: 'Audiobook' },
+                      { key: 3, value: 'eBook and Audiobook' }
+                    ]}
+                    {...defaultWantedMediaTypes}
+                    onChange={onInputChange}
+                  />
+                </FormGroup>
+
+                <FormGroup>
+                  <FormLabel>
+                    {translate('EbookQualityProfile')}
+                  </FormLabel>
+
+                  <FormInputGroup
+                    type={inputTypes.QUALITY_PROFILE_SELECT}
+                    name="defaultEbookQualityProfileId"
+                    helpText={translate('DefaultQualityProfileIdHelpText')}
+                    {...defaultEbookQualityProfileId}
+                    onChange={onInputChange}
+                  />
+                </FormGroup>
+
+                <FormGroup>
+                  <FormLabel>
+                    {translate('AudiobookQualityProfile')}
+                  </FormLabel>
+
+                  <FormInputGroup
+                    type={inputTypes.QUALITY_PROFILE_SELECT}
+                    name="defaultAudiobookQualityProfileId"
+                    helpText={translate('DefaultQualityProfileIdHelpText')}
+                    {...defaultAudiobookQualityProfileId}
+                    onChange={onInputChange}
+                  />
+                </FormGroup>
+
+                <FormGroup>
+                  <FormLabel>
+                    {translate('LegacyQualityProfile')}
                   </FormLabel>
 
                   <FormInputGroup

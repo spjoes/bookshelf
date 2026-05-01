@@ -44,7 +44,10 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
             _logger.Debug("Performing already imported check on report");
             foreach (var book in subject.Books)
             {
-                var bookFiles = _mediaFileService.GetFilesByBook(book.Id);
+                var mediaType = subject.MediaType == BookMediaType.Unknown ? subject.ParsedBookInfo.Quality.GetMediaType() : subject.MediaType;
+                var bookFiles = _mediaFileService.GetFilesByBook(book.Id)
+                    .Where(f => mediaType == BookMediaType.Unknown || f.GetMediaType() == mediaType)
+                    .ToList();
 
                 if (bookFiles.Count() == 0)
                 {

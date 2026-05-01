@@ -63,9 +63,9 @@ namespace NzbDrone.Core.Profiles.Qualities
 
         public void Delete(int id)
         {
-            if (_authorService.GetAllAuthors().Any(c => c.QualityProfileId == id) ||
-                _importListFactory.All().Any(c => c.ProfileId == id) ||
-                _rootFolderService.All().Any(c => c.DefaultQualityProfileId == id))
+            if (_authorService.GetAllAuthors().Any(c => c.QualityProfileId == id || c.EbookQualityProfileId == id || c.AudiobookQualityProfileId == id) ||
+                _importListFactory.All().Any(c => c.ProfileId == id || c.EbookProfileId == id || c.AudiobookProfileId == id) ||
+                _rootFolderService.All().Any(c => c.DefaultQualityProfileId == id || c.DefaultEbookQualityProfileId == id || c.DefaultAudiobookQualityProfileId == id))
             {
                 var profile = _profileRepository.Get(id);
                 throw new QualityProfileInUseException(profile.Name);

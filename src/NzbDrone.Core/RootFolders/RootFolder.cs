@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using NzbDrone.Core.Books;
 using NzbDrone.Core.Books.Calibre;
 using NzbDrone.Core.Datastore;
+using NzbDrone.Core.MediaFiles;
 
 namespace NzbDrone.Core.RootFolders
 {
@@ -11,6 +12,9 @@ namespace NzbDrone.Core.RootFolders
         public string Path { get; set; }
         public int DefaultMetadataProfileId { get; set; }
         public int DefaultQualityProfileId { get; set; }
+        public int DefaultEbookQualityProfileId { get; set; }
+        public int DefaultAudiobookQualityProfileId { get; set; }
+        public WantedMediaTypes DefaultWantedMediaTypes { get; set; }
         public MonitorTypes DefaultMonitorOption { get; set; }
         public NewItemMonitorTypes DefaultNewItemMonitorOption { get; set; }
         public HashSet<int> DefaultTags { get; set; } = new ();

@@ -346,6 +346,7 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Manual
                         Size = fileInfo.Length,
                         Modified = fileInfo.LastWriteTimeUtc,
                         Quality = file.Quality,
+                        MediaType = MediaFileExtensions.GetMediaTypeForPath(file.Path),
                         IndexerFlags = (IndexerFlags)file.IndexerFlags,
                         Author = author,
                         Book = book,

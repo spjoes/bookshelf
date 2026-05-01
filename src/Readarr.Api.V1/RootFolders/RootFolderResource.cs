@@ -4,6 +4,7 @@ using System.Linq;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Books;
 using NzbDrone.Core.Books.Calibre;
+using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.RootFolders;
 using Readarr.Http.REST;
 
@@ -15,6 +16,9 @@ namespace Readarr.Api.V1.RootFolders
         public string Path { get; set; }
         public int DefaultMetadataProfileId { get; set; }
         public int DefaultQualityProfileId { get; set; }
+        public int DefaultEbookQualityProfileId { get; set; }
+        public int DefaultAudiobookQualityProfileId { get; set; }
+        public WantedMediaTypes DefaultWantedMediaTypes { get; set; }
         public MonitorTypes DefaultMonitorOption { get; set; }
         public NewItemMonitorTypes DefaultNewItemMonitorOption { get; set; }
         public HashSet<int> DefaultTags { get; set; }
@@ -51,6 +55,9 @@ namespace Readarr.Api.V1.RootFolders
                 Path = model.Path.GetCleanPath(),
                 DefaultMetadataProfileId = model.DefaultMetadataProfileId,
                 DefaultQualityProfileId = model.DefaultQualityProfileId,
+                DefaultEbookQualityProfileId = model.DefaultEbookQualityProfileId == 0 ? model.DefaultQualityProfileId : model.DefaultEbookQualityProfileId,
+                DefaultAudiobookQualityProfileId = model.DefaultAudiobookQualityProfileId == 0 ? model.DefaultQualityProfileId : model.DefaultAudiobookQualityProfileId,
+                DefaultWantedMediaTypes = model.DefaultWantedMediaTypes == WantedMediaTypes.None ? WantedMediaTypes.Ebook : model.DefaultWantedMediaTypes,
                 DefaultMonitorOption = model.DefaultMonitorOption,
                 DefaultNewItemMonitorOption = model.DefaultNewItemMonitorOption,
                 DefaultTags = model.DefaultTags,
@@ -107,6 +114,9 @@ namespace Readarr.Api.V1.RootFolders
 
                 DefaultMetadataProfileId = resource.DefaultMetadataProfileId,
                 DefaultQualityProfileId = resource.DefaultQualityProfileId,
+                DefaultEbookQualityProfileId = resource.DefaultEbookQualityProfileId == 0 ? resource.DefaultQualityProfileId : resource.DefaultEbookQualityProfileId,
+                DefaultAudiobookQualityProfileId = resource.DefaultAudiobookQualityProfileId == 0 ? resource.DefaultQualityProfileId : resource.DefaultAudiobookQualityProfileId,
+                DefaultWantedMediaTypes = resource.DefaultWantedMediaTypes == WantedMediaTypes.None ? WantedMediaTypes.Ebook : resource.DefaultWantedMediaTypes,
                 DefaultMonitorOption = resource.DefaultMonitorOption,
                 DefaultNewItemMonitorOption = resource.DefaultNewItemMonitorOption,
                 DefaultTags = resource.DefaultTags ?? new HashSet<int>(),

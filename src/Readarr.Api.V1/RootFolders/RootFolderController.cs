@@ -68,6 +68,14 @@ namespace Readarr.Api.V1.RootFolders
                 .ValidId()
                 .SetValidator(qualityProfileExistsValidator);
 
+            SharedValidator.RuleFor(c => c.DefaultEbookQualityProfileId).Cascade(CascadeMode.Stop)
+                .ValidId()
+                .SetValidator(qualityProfileExistsValidator);
+
+            SharedValidator.RuleFor(c => c.DefaultAudiobookQualityProfileId).Cascade(CascadeMode.Stop)
+                .ValidId()
+                .SetValidator(qualityProfileExistsValidator);
+
             SharedValidator.RuleFor(c => c.Host).ValidHost().When(x => x.IsCalibreLibrary);
             SharedValidator.RuleFor(c => c.Port).InclusiveBetween(1, 65535).When(x => x.IsCalibreLibrary);
             SharedValidator.RuleFor(c => c.UrlBase).ValidUrlBase().When(c => c.UrlBase.IsNotNullOrWhiteSpace());

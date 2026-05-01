@@ -49,12 +49,27 @@ namespace NzbDrone.Core.AuthorStats
         {
             var trueIndicator = _database.DatabaseType == DatabaseType.PostgreSQL ? "true" : "1";
 
+            var hasEbook = @"EXISTS (
+                         SELECT 1 FROM ""BookFiles"" ""EbookFiles""
+                         INNER JOIN ""Editions"" ""EbookEditions"" ON ""EbookFiles"".""EditionId"" = ""EbookEditions"".""Id""
+                         WHERE ""EbookEditions"".""BookId"" = ""Books"".""Id"" AND ""EbookFiles"".""MediaType"" = 1
+                     )";
+            var hasAudiobook = @"EXISTS (
+                         SELECT 1 FROM ""BookFiles"" ""AudiobookFiles""
+                         INNER JOIN ""Editions"" ""AudiobookEditions"" ON ""AudiobookFiles"".""EditionId"" = ""AudiobookEditions"".""Id""
+                         WHERE ""AudiobookEditions"".""BookId"" = ""Books"".""Id"" AND ""AudiobookFiles"".""MediaType"" = 2
+                     )";
+
             return new SqlBuilder(_database.DatabaseType)
             .Select($@"""Authors"".""Id"" AS ""AuthorId"",
                      ""Books"".""Id"" AS ""BookId"",
                      SUM(COALESCE(""BookFiles"".""Size"", 0)) AS ""SizeOnDisk"",
                      1 AS ""TotalBookCount"",
-                     CASE WHEN MIN(""BookFiles"".""Id"") IS NULL THEN 0 ELSE 1 END AS ""AvailableBookCount"",
+                     CASE WHEN ""Authors"".""WantedMediaTypes"" = 0 AND MIN(""BookFiles"".""Id"") IS NOT NULL THEN 1
+                     WHEN ""Authors"".""WantedMediaTypes"" != 0 AND
+                        ((""Authors"".""WantedMediaTypes"" & 1) = 0 OR {hasEbook})
+                        AND ((""Authors"".""WantedMediaTypes"" & 2) = 0 OR {hasAudiobook})
+                     THEN 1 ELSE 0 END AS ""AvailableBookCount"",
                      CASE WHEN (""Books"".""Monitored"" = {trueIndicator} AND (""Books"".""ReleaseDate"" < @currentDate) OR ""Books"".""ReleaseDate"" IS NULL) OR MIN(""BookFiles"".""Id"") IS NOT NULL THEN 1 ELSE 0 END AS ""BookCount"",
                      CASE WHEN MIN(""BookFiles"".""Id"") IS NULL THEN 0 ELSE COUNT(""BookFiles"".""Id"") END AS ""BookFileCount""")
             .Join<Edition, Book>((e, b) => e.BookId == b.Id)

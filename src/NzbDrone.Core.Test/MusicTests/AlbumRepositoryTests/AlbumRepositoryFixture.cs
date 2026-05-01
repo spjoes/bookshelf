@@ -7,6 +7,8 @@ using FluentAssertions.Equivalency;
 using NUnit.Framework;
 using NzbDrone.Core.Books;
 using NzbDrone.Core.Datastore;
+using NzbDrone.Core.MediaFiles;
+using NzbDrone.Core.Qualities;
 using NzbDrone.Core.Test.Framework;
 
 namespace NzbDrone.Core.Test.MusicTests.BookRepositoryTests
@@ -162,6 +164,56 @@ namespace NzbDrone.Core.Test.MusicTests.BookRepositoryTests
 
             var result = _bookRepo.GetLastBooks(new[] { _author.AuthorMetadataId });
             result.Should().BeEquivalentTo(_books.Skip(2).Take(1), BookComparerOptions);
+        }
+
+        [Test]
+        public void books_without_files_should_include_book_with_only_one_of_two_wanted_media_types()
+        {
+            var metadata = Builder<AuthorMetadata>.CreateNew()
+                .With(x => x.Id = 0)
+                .BuildNew();
+            Db.Insert(metadata);
+
+            var author = Builder<Author>.CreateNew()
+                .With(x => x.Id = 0)
+                .With(x => x.AuthorMetadataId = metadata.Id)
+                .With(x => x.WantedMediaTypes = WantedMediaTypes.All)
+                .BuildNew();
+            Db.Insert(author);
+
+            var book = Builder<Book>.CreateNew()
+                .With(x => x.Id = 0)
+                .With(x => x.AuthorMetadataId = metadata.Id)
+                .With(x => x.Monitored = true)
+                .With(x => x.ReleaseDate = DateTime.UtcNow.AddDays(-1))
+                .BuildNew();
+            Db.Insert(book);
+
+            var edition = Builder<Edition>.CreateNew()
+                .With(x => x.Id = 0)
+                .With(x => x.BookId = book.Id)
+                .With(x => x.Monitored = true)
+                .BuildNew();
+            Db.Insert(edition);
+
+            Db.Insert(Builder<BookFile>.CreateNew()
+                .With(x => x.Id = 0)
+                .With(x => x.EditionId = edition.Id)
+                .With(x => x.MediaType = BookMediaType.Ebook)
+                .With(x => x.Quality = new QualityModel(Quality.EPUB))
+                .BuildNew());
+
+            var pagingSpec = new PagingSpec<Book>
+            {
+                Page = 1,
+                PageSize = 10,
+                SortKey = "Title",
+                SortDirection = SortDirection.Ascending
+            };
+
+            var result = _bookRepo.BooksWithoutFiles(pagingSpec);
+
+            result.Records.Should().Contain(x => x.Id == book.Id);
         }
 
         private EquivalencyAssertionOptions<Book> BookComparerOptions(EquivalencyAssertionOptions<Book> opts) => opts.ComparingByMembers<Book>()

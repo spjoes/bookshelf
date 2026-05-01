@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using NzbDrone.Common.EnsureThat;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Books;
+using NzbDrone.Core.MediaFiles;
 
 namespace NzbDrone.Core.IndexerSearch.Definitions
 {
@@ -17,6 +18,7 @@ namespace NzbDrone.Core.IndexerSearch.Definitions
 
         public Author Author { get; set; }
         public List<Book> Books { get; set; }
+        public BookMediaType MediaType { get; set; }
 
         public string AuthorQuery => GetQueryTitle(Author.Name);
 

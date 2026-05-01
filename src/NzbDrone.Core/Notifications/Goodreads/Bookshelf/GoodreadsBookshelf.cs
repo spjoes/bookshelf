@@ -36,7 +36,7 @@ namespace NzbDrone.Core.Notifications.Goodreads
                 }
             }
 
-            var bookId = importedBook.Editions.Value.Single(x => x.Monitored).ForeignEditionId;
+            var bookId = importedBook.Editions.Value.First(x => x.Monitored).ForeignEditionId;
             AddToShelves(bookId, Settings.AddIds);
         }
 

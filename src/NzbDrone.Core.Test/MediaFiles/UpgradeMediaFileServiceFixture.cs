@@ -123,6 +123,36 @@ namespace NzbDrone.Core.Test.MediaFiles
         }
 
         [Test]
+        public void should_only_replace_existing_files_of_the_same_media_type()
+        {
+            _localTrack.MediaType = BookMediaType.Audiobook;
+            _localTrack.Book = Builder<Book>.CreateNew()
+                .With(e => e.BookFiles = new LazyLoaded<List<BookFile>>(
+                          new List<BookFile>
+                          {
+                              new BookFile
+                              {
+                                  Id = 1,
+                                  Path = Path.Combine(_rootPath, "Book.epub"),
+                                  MediaType = BookMediaType.Ebook
+                              },
+                              new BookFile
+                              {
+                                  Id = 2,
+                                  Path = Path.Combine(_rootPath, "Book.mp3"),
+                                  MediaType = BookMediaType.Audiobook
+                              }
+                          }))
+                .Build();
+
+            var result = Subject.UpgradeBookFile(_trackFile, _localTrack);
+
+            result.OldFiles.Should().ContainSingle(x => x.Id == 2);
+            Mocker.GetMock<IMediaFileService>().Verify(v => v.Delete(It.Is<BookFile>(f => f.Id == 2), DeleteMediaFileReason.Upgrade), Times.Once());
+            Mocker.GetMock<IMediaFileService>().Verify(v => v.Delete(It.Is<BookFile>(f => f.Id == 1), DeleteMediaFileReason.Upgrade), Times.Never());
+        }
+
+        [Test]
         [Ignore("Pending readarr fix")]
         public void should_import_if_existing_file_doesnt_exist_in_db()
         {

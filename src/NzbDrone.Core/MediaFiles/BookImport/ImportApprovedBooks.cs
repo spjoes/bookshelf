@@ -152,8 +152,8 @@ namespace NzbDrone.Core.MediaFiles.BookImport
             }
 
             var qualifiedImports = decisions.Where(c => c.Approved)
-                .GroupBy(c => c.Item.Author.Id, (i, s) => s
-                         .OrderByDescending(c => c.Item.Quality, new QualityModelComparer(s.First().Item.Author.QualityProfile))
+                .GroupBy(c => new { c.Item.Author.Id, c.Item.MediaType }, (i, s) => s
+                         .OrderByDescending(c => c.Item.Quality, new QualityModelComparer(s.First().Item.Author.GetQualityProfile(s.First().Item.MediaType) ?? s.First().Item.Author.QualityProfile.Value))
                          .ThenByDescending(c => c.Item.Size))
                 .SelectMany(c => c)
                 .ToList();
@@ -172,7 +172,7 @@ namespace NzbDrone.Core.MediaFiles.BookImport
                 try
                 {
                     //check if already imported
-                    if (importResults.Where(r => r.ImportDecision.Item.Book.Id == localTrack.Book.Id).Any(r => r.ImportDecision.Item.Part == localTrack.Part))
+                    if (importResults.Where(r => r.ImportDecision.Item.Book.Id == localTrack.Book.Id && r.ImportDecision.Item.MediaType == localTrack.MediaType).Any(r => r.ImportDecision.Item.Part == localTrack.Part))
                     {
                         importResults.Add(new ImportResult(importDecision, "Book has already been imported"));
                         continue;
@@ -191,6 +191,7 @@ namespace NzbDrone.Core.MediaFiles.BookImport
                         DateAdded = DateTime.UtcNow,
                         ReleaseGroup = localTrack.ReleaseGroup,
                         Quality = localTrack.Quality,
+                        MediaType = localTrack.MediaType == BookMediaType.Unknown ? MediaFileExtensions.GetMediaTypeForPath(localTrack.Path) : localTrack.MediaType,
                         MediaInfo = localTrack.FileTrackInfo.MediaInfo,
                         EditionId = localTrack.Edition.Id,
                         Author = localTrack.Author,
@@ -319,12 +320,12 @@ namespace NzbDrone.Core.MediaFiles.BookImport
             }
 
             var bookImports = importResults.Where(e => e.ImportDecision.Item.Book != null)
-                .GroupBy(e => e.ImportDecision.Item.Book.Id).ToList();
+                .GroupBy(e => new { e.ImportDecision.Item.Book.Id, e.ImportDecision.Item.MediaType }).ToList();
 
             foreach (var bookImport in bookImports)
             {
                 var book = bookImport.First().ImportDecision.Item.Book;
-                var edition = book.Editions.Value.Single(x => x.Monitored);
+                var edition = bookImport.First().ImportDecision.Item.Edition;
                 var author = bookImport.First().ImportDecision.Item.Author;
 
                 if (bookImport.Where(e => e.Errors.Count == 0).ToList().Count > 0 && author != null && book != null)
@@ -332,8 +333,8 @@ namespace NzbDrone.Core.MediaFiles.BookImport
                     _eventAggregator.PublishEvent(new BookImportedEvent(
                         author,
                         book,
-                        allImportedTrackFiles.Where(s => s.EditionId == edition.Id).ToList(),
-                        allOldTrackFiles.Where(s => s.EditionId == edition.Id).ToList(),
+                        allImportedTrackFiles.Where(s => s.EditionId == edition.Id && s.GetMediaType() == bookImport.Key.MediaType).ToList(),
+                        allOldTrackFiles.Where(s => s.EditionId == edition.Id && s.GetMediaType() == bookImport.Key.MediaType).ToList(),
                         replaceExisting,
                         downloadClientItem));
                 }
@@ -379,6 +380,9 @@ namespace NzbDrone.Core.MediaFiles.BookImport
                     author.RootFolderPath = rootFolder.Path;
                     author.MetadataProfileId = rootFolder.DefaultMetadataProfileId;
                     author.QualityProfileId = rootFolder.DefaultQualityProfileId;
+                    author.EbookQualityProfileId = rootFolder.DefaultEbookQualityProfileId == 0 ? rootFolder.DefaultQualityProfileId : rootFolder.DefaultEbookQualityProfileId;
+                    author.AudiobookQualityProfileId = rootFolder.DefaultAudiobookQualityProfileId == 0 ? rootFolder.DefaultQualityProfileId : rootFolder.DefaultAudiobookQualityProfileId;
+                    author.WantedMediaTypes = rootFolder.DefaultWantedMediaTypes == WantedMediaTypes.None ? decisions.First().Item.MediaType.ToWantedMediaType() : rootFolder.DefaultWantedMediaTypes;
                     author.Monitored = rootFolder.DefaultMonitorOption != MonitorTypes.None;
                     author.MonitorNewItems = rootFolder.DefaultNewItemMonitorOption;
                     author.Tags = rootFolder.DefaultTags;

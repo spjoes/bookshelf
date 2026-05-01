@@ -1,5 +1,6 @@
 using NLog;
 using NzbDrone.Core.IndexerSearch.Definitions;
+using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Parser.Model;
 
 namespace NzbDrone.Core.DecisionEngine.Specifications
@@ -20,7 +21,15 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
         {
             _logger.Debug("Checking if report meets quality requirements. {0}", subject.ParsedBookInfo.Quality);
 
-            var profile = subject.Author.QualityProfile.Value;
+            var mediaType = subject.MediaType == BookMediaType.Unknown ? subject.ParsedBookInfo.Quality.GetMediaType() : subject.MediaType;
+
+            if (mediaType != BookMediaType.Unknown && !subject.Author.WantsMediaType(mediaType))
+            {
+                _logger.Debug("Media type {0} rejected by Author's wanted media settings", mediaType);
+                return Decision.Reject("{0} is not wanted", mediaType);
+            }
+
+            var profile = subject.Author.GetQualityProfile(mediaType) ?? subject.Author.QualityProfile.Value;
             var qualityIndex = profile.GetIndex(subject.ParsedBookInfo.Quality.Quality);
             var qualityOrGroup = profile.Items[qualityIndex.Index];
 

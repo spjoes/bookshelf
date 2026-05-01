@@ -111,10 +111,27 @@ namespace NzbDrone.Core.Books
             .Join<Book, Author>((l, r) => l.AuthorMetadataId == r.AuthorMetadataId)
             .Join<Author, AuthorMetadata>((l, r) => l.AuthorMetadataId == r.Id)
             .Join<Book, Edition>((b, e) => b.Id == e.BookId)
-            .LeftJoin<Edition, BookFile>((t, f) => t.Id == f.EditionId)
-            .Where<BookFile>(f => f.Id == null)
             .Where<Edition>(e => e.Monitored == true)
-            .Where<Book>(a => a.ReleaseDate <= currentTime);
+            .Where<Book>(a => a.ReleaseDate <= currentTime)
+            .Where(@"(
+                (""Authors"".""WantedMediaTypes"" = 0 AND NOT EXISTS (
+                    SELECT 1 FROM ""BookFiles"" ""AnyFiles""
+                    INNER JOIN ""Editions"" ""AnyFileEditions"" ON ""AnyFiles"".""EditionId"" = ""AnyFileEditions"".""Id""
+                    WHERE ""AnyFileEditions"".""BookId"" = ""Books"".""Id""
+                ))
+                OR
+                ((""Authors"".""WantedMediaTypes"" & 1) != 0 AND NOT EXISTS (
+                    SELECT 1 FROM ""BookFiles"" ""EbookFiles""
+                    INNER JOIN ""Editions"" ""EbookEditions"" ON ""EbookFiles"".""EditionId"" = ""EbookEditions"".""Id""
+                    WHERE ""EbookEditions"".""BookId"" = ""Books"".""Id"" AND ""EbookFiles"".""MediaType"" = 1
+                ))
+                OR
+                ((""Authors"".""WantedMediaTypes"" & 2) != 0 AND NOT EXISTS (
+                    SELECT 1 FROM ""BookFiles"" ""AudiobookFiles""
+                    INNER JOIN ""Editions"" ""AudiobookEditions"" ON ""AudiobookFiles"".""EditionId"" = ""AudiobookEditions"".""Id""
+                    WHERE ""AudiobookEditions"".""BookId"" = ""Books"".""Id"" AND ""AudiobookFiles"".""MediaType"" = 2
+                ))
+            )");
 #pragma warning restore CS0472
 
         public PagingSpec<Book> BooksWithoutFiles(PagingSpec<Book> pagingSpec)
@@ -143,7 +160,16 @@ namespace NzbDrone.Core.Books
             {
                 foreach (var belowCutoff in profile.QualityIds)
                 {
-                    clauses.Add(string.Format("(\"Authors\".\"QualityProfileId\" = {0} AND \"BookFiles\".\"Quality\" LIKE '%_quality_: {1},%')", profile.ProfileId, belowCutoff));
+                    clauses.Add(string.Format(@"(
+                        (
+                            (""BookFiles"".""MediaType"" = 1 AND ""Authors"".""EbookQualityProfileId"" = {0})
+                            OR (""BookFiles"".""MediaType"" = 2 AND ""Authors"".""AudiobookQualityProfileId"" = {0})
+                            OR (""BookFiles"".""MediaType"" = 0 AND ""Authors"".""QualityProfileId"" = {0})
+                        )
+                        AND ""BookFiles"".""Quality"" LIKE '%_quality_: {1},%'
+                    )",
+                    profile.ProfileId,
+                    belowCutoff));
                 }
             }
 

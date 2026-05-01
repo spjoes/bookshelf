@@ -22,6 +22,18 @@ class AddAuthorOptionsForm extends Component {
     this.props.onInputChange({ name: 'qualityProfileId', value: parseInt(value) });
   };
 
+  onEbookQualityProfileIdChange = ({ value }) => {
+    this.props.onInputChange({ name: 'ebookQualityProfileId', value: parseInt(value) });
+  };
+
+  onAudiobookQualityProfileIdChange = ({ value }) => {
+    this.props.onInputChange({ name: 'audiobookQualityProfileId', value: parseInt(value) });
+  };
+
+  onWantedMediaTypesChange = ({ value }) => {
+    this.props.onInputChange({ name: 'wantedMediaTypes', value: parseInt(value) });
+  };
+
   onMetadataProfileIdChange = ({ value }) => {
     this.props.onInputChange({ name: 'metadataProfileId', value: parseInt(value) });
   };
@@ -35,6 +47,9 @@ class AddAuthorOptionsForm extends Component {
       monitor,
       monitorNewItems,
       qualityProfileId,
+      ebookQualityProfileId,
+      audiobookQualityProfileId,
+      wantedMediaTypes,
       metadataProfileId,
       includeNoneMetadataProfile,
       includeSpecificBookMonitor,
@@ -124,7 +139,51 @@ class AddAuthorOptionsForm extends Component {
 
         <FormGroup>
           <FormLabel>
-            {translate('QualityProfile')}
+            Wanted Media
+          </FormLabel>
+
+          <FormInputGroup
+            type={inputTypes.SELECT}
+            name="wantedMediaTypes"
+            values={[
+              { key: 1, value: 'eBook' },
+              { key: 2, value: 'Audiobook' },
+              { key: 3, value: 'eBook and Audiobook' }
+            ]}
+            onChange={this.onWantedMediaTypesChange}
+            {...wantedMediaTypes}
+          />
+        </FormGroup>
+
+        <FormGroup>
+          <FormLabel>
+            eBook Quality Profile
+          </FormLabel>
+
+          <FormInputGroup
+            type={inputTypes.QUALITY_PROFILE_SELECT}
+            name="ebookQualityProfileId"
+            onChange={this.onEbookQualityProfileIdChange}
+            {...ebookQualityProfileId}
+          />
+        </FormGroup>
+
+        <FormGroup>
+          <FormLabel>
+            Audiobook Quality Profile
+          </FormLabel>
+
+          <FormInputGroup
+            type={inputTypes.QUALITY_PROFILE_SELECT}
+            name="audiobookQualityProfileId"
+            onChange={this.onAudiobookQualityProfileIdChange}
+            {...audiobookQualityProfileId}
+          />
+        </FormGroup>
+
+        <FormGroup>
+          <FormLabel>
+            {translate('LegacyQualityProfile')}
           </FormLabel>
 
           <FormInputGroup
@@ -186,6 +245,9 @@ AddAuthorOptionsForm.propTypes = {
   monitor: PropTypes.object.isRequired,
   monitorNewItems: PropTypes.object.isRequired,
   qualityProfileId: PropTypes.object,
+  ebookQualityProfileId: PropTypes.object,
+  audiobookQualityProfileId: PropTypes.object,
+  wantedMediaTypes: PropTypes.object,
   metadataProfileId: PropTypes.object,
   showMetadataProfile: PropTypes.bool.isRequired,
   includeNoneMetadataProfile: PropTypes.bool.isRequired,

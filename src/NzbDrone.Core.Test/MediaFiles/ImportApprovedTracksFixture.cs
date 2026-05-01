@@ -69,6 +69,7 @@ namespace NzbDrone.Core.Test.MediaFiles
                                            Part = 1,
                                            Path = Path.Combine(author.Path, "Alien Ant Farm - 01 - Pilot.mp3"),
                                            Quality = new QualityModel(Quality.MP3),
+                                           MediaType = BookMediaType.Audiobook,
                                            FileTrackInfo = new ParsedTrackInfo
                                            {
                                                ReleaseGroup = "DRONE"
@@ -135,6 +136,31 @@ namespace NzbDrone.Core.Test.MediaFiles
         }
 
         [Test]
+        public void should_allow_same_book_part_for_different_media_types()
+        {
+            var audioDecision = _approvedDecisions.First();
+            var ebookDecision = new ImportDecision<LocalBook>(
+                new LocalBook
+                {
+                    Author = audioDecision.Item.Author,
+                    Book = audioDecision.Item.Book,
+                    Edition = audioDecision.Item.Edition,
+                    Part = audioDecision.Item.Part,
+                    Path = Path.Combine(audioDecision.Item.Author.Path, "Alien Ant Farm - Pilot.epub"),
+                    Quality = new QualityModel(Quality.EPUB),
+                    MediaType = BookMediaType.Ebook,
+                    FileTrackInfo = new ParsedTrackInfo
+                    {
+                        ReleaseGroup = "DRONE"
+                    }
+                });
+
+            var result = Subject.Import(new List<ImportDecision<LocalBook>> { audioDecision, ebookDecision }, false);
+
+            result.Where(i => i.Result == ImportResultType.Imported).Should().HaveCount(2);
+        }
+
+        [Test]
         public void should_move_new_downloads()
         {
             Subject.Import(new List<ImportDecision<LocalBook>> { _approvedDecisions.First() }, true);
@@ -170,6 +196,7 @@ namespace NzbDrone.Core.Test.MediaFiles
         {
             var lqDecision = _approvedDecisions.First();
             lqDecision.Item.Quality = new QualityModel(Quality.MOBI);
+            lqDecision.Item.MediaType = BookMediaType.Ebook;
             lqDecision.Item.Size = 10.Megabytes();
 
             var hqDecision = new ImportDecision<LocalBook>(
@@ -181,6 +208,7 @@ namespace NzbDrone.Core.Test.MediaFiles
                     Part = 1,
                     Path = @"C:\Test\Music\Alien Ant Farm\Alien Ant Farm - 01 - Pilot.mp3".AsOsAgnostic(),
                     Quality = new QualityModel(Quality.AZW3),
+                    MediaType = BookMediaType.Ebook,
                     Size = 1.Megabytes(),
                     FileTrackInfo = new ParsedTrackInfo
                     {
@@ -204,6 +232,7 @@ namespace NzbDrone.Core.Test.MediaFiles
         {
             var fileDecision = _approvedDecisions.First();
             fileDecision.Item.Size = 1.Gigabytes();
+            fileDecision.Item.MediaType = BookMediaType.Audiobook;
 
             var sampleDecision = new ImportDecision<LocalBook>(
                 new LocalBook
@@ -214,6 +243,7 @@ namespace NzbDrone.Core.Test.MediaFiles
                     Part = 1,
                     Path = @"C:\Test\Music\Alien Ant Farm\Alien Ant Farm - 01 - Pilot.mp3".AsOsAgnostic(),
                     Quality = new QualityModel(Quality.MP3),
+                    MediaType = BookMediaType.Audiobook,
                     Size = 80.Megabytes()
                 });
 
