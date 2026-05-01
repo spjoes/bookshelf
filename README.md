@@ -36,6 +36,9 @@ an issue or start a discussion.
 Help is very welcome. Priority is on fixing quality of life issues
 
 - [ ] Monitor series.
+
+Under Development
+
 - [ ] Support ebook and audio files in the same root.
 
 Already done
